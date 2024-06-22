@@ -2,13 +2,14 @@ package my.examples.curse_homework
 
 interface Tree<out T1, out T2 : Tree<T1, T2>> {
     val value: T1
-    val listOfChildren: ArrayList<out T2>
+    val listOfChildren: List<T2>
 }
 
 open class TreeImpl<T1, T2>(
     override val value: T1,
-    override val listOfChildren: ArrayList<T2>
-) : Tree<T1, T2> where T2 : TreeImpl<T1, T2>
+    override val listOfChildren: List<T2>
+) : Tree<T1, T2> where T2 : TreeImpl<T1, T2> {
+}
 
 class TreeAnyImpl(
     override val value: Any,
@@ -37,8 +38,14 @@ fun <T1, T2 : Tree<T1, T2>> Tree<T1, T2>.searchByValue(valueInp: T1): Tree<T1, T
     return tree
 }
 
-fun <T1, T2 : Tree<T1, T2>> Tree<T1, T2>.addSubTree(valueInp: T1, subTree: Tree<T1, T2>) {
-    //todo Написать, как станет понятно, что писать :с
+fun TreeAnyImpl.addSubTree(subTree: TreeAnyImpl): TreeAnyImpl {
+
+    val listForAddSubTree = this.listOfChildren.toMutableList()
+    listForAddSubTree.add(subTree)
+
+    val newList = listForAddSubTree.toList()
+
+    return TreeAnyImpl(value = this.value, listOfChildren = newList as ArrayList<TreeAnyImpl>)
 }
 
 fun main() {
@@ -52,4 +59,14 @@ fun main() {
     treeAnyImpl.visit()
     treeAnyImpl.searchByValue(24)?.visit()
     treeAnyImpl.searchByValue(0)?.visit()
+
+    println()
+    val rootTree = treeAnyImpl.addSubTree(
+        TreeAnyImpl(
+            15, arrayListOf(
+                TreeAnyImpl(8, arrayListOf())
+            )
+        )
+    )
+    rootTree.visit()
 }
